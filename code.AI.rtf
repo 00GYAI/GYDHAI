@@ -1,0 +1,55 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2580
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;\f1\fnil\fcharset129 AppleSDGothicNeo-Regular;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab560
+\pard\pardeftab560\slleading20\pardirnatural\partightenfactor0
+
+\f0\fs22 \cf0 GitHub 
+\f1 \'c1\'d6\'bc\'d2
+\f0  : https://github.com/00GYAI/GYDHAI.git\
+
+\f1 \'b1\'d7\'b7\'ec
+\f0  
+\f1 \'c0\'ce\'bf\'f8
+\f0 : 
+\f1 \'b1\'e8\'b0\'a1\'bf\'b5, \'c0\'d3\'b5\'bf\'c7\'f5
+\f0 \
+\
+import time\
+import requests\
+import pandas as pd\
+import datetime\
+\
+while True:\
+    book = \{\}\
+    response = requests.get('https://api.bithumb.com/public/orderbook/BTC_KRW/?count=5')\
+    book = response.json()\
+\
+    data = book['data']\
+\
+    bids = pd.DataFrame(data['bids']).apply(pd.to_numeric, errors='ignore')\
+    bids.sort_values('price', ascending=False, inplace=True)\
+    bids = bids.reset_index()\
+    del bids['index']\
+    bids['type'] = 0\
+\
+    asks = pd.DataFrame(data['asks']).apply(pd.to_numeric, errors='ignore')\
+    asks.sort_values('price', ascending=True, inplace=True)\
+    asks['type'] = 1\
+\
+    df = bids.append(asks)\
+\
+    timestamp = datetime.datetime.now()\
+    req_timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S')\
+\
+    df['quantity'] = df['quantity'].round(decimals=4)\
+    df['timestamp'] = req_timestamp\
+\
+    print(df[['price', 'quantity', 'type', 'timestamp']])\
+\
+    df.to_csv("./2022-05-18-bithumb-orderbook.csv", index=False, header=False, mode='a')\
+\
+    time.sleep(4.9)\
+}
